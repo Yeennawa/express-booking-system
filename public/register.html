@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - สมัครสมาชิก</title>
+    <style>
+        body {
+            margin: 0; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; background: #222d32; font-family: sans-serif;
+        }
+        .card {
+            background: white; padding: 40px; border-radius: 10px;
+            width: 100%; max-width: 350px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        input {
+            width: 100%; padding: 12px; margin-bottom: 15px;
+            border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; background: #f8b400;
+            border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Register</h2>
+        <form id="regForm">
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="pass" placeholder="Password" required>
+            <button type="submit">CREATE ACCOUNT</button>
+        </form>
+        <p style="font-size: 13px; margin-top: 15px;">
+            มีบัญชีแล้ว? <a href="/login.html">Login ที่นี่</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('pass').value
+                })
+            });
+            const result = await res.json();
+            alert(result.message || "เกิดข้อผิดพลาดบางอย่าง");
+            if (result.success) window.location.href = '/login.html';
+        };
+    </script>
+</body>
+</html>

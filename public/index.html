@@ -9,6 +9,13 @@
     <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
+<script>
+    // 🛡️ ด่านตรวจความปลอดภัย: ถ้าไม่มี Token ให้เตะกลับไปหน้า Login ทันที
+    // ตรวจสอบก่อนที่ HTML ตัวอื่นจะโหลด เพื่อไม่ให้หน้าจองกะพริบขึ้นมา
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login.html';
+    }
+</script>
 
 <body>
     <div id="booking" class="section">
