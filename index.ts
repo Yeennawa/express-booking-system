@@ -26,22 +26,31 @@ db.connect((err) => {
   console.log('Connected to MySQL Database!');
 });
 
-app.post('/api/booking', (req: Request, res: Response) => {
-    const { customer_name, phone, booking_date, booking_time } = req.body;
-
-    const sql = "INSERT INTO appointments (customer_name, phone, booking_date, booking_time) VALUES (?, ?, ?, ?)";
+app.post('/api/booking', (req, res) => {
+    const { destination, check_in, check_out, rooms, adults, children } = req.body;
     
-    db.query(sql, [customer_name, phone, booking_date, booking_time], (err, result) => {
-        if (err) {
-            console.error("เกิดข้อผิดพลาดในการบันทึก:", err);
-            return res.status(500).send("เกิดข้อผิดพลาดที่ Server");
-        }
-        res.send({ message: "จองคิวสำเร็จแล้ว!", id: (result as any).insertId });
+    const sql = "INSERT INTO appointments (destination, check_in, check_out, rooms, adults, children) VALUES (?, ?, ?, ?, ?, ?)";
+    
+    db.query(sql, [destination, check_in, check_out, rooms, adults, children], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Booking Successful!" });
     });
 });
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Backend is running!');
+app.post('/api/login', (req: Request, res: Response) => {
+    const { username, password } = req.body;
+    
+    const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    
+    db.query(sql, [username, password], (err, results: any) => {
+        if (err) return res.status(500).json(err);
+        
+        if (results.length > 0) {
+            res.json({ success: true, message: "Login Successful!" });
+        } else {
+            res.status(401).json({ success: false, message: "Username หรือ Password ผิด!" });
+        }
+    });
 });
 
 app.listen(port, () => {

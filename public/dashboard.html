@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Admin Dashboard</title>
+    <link type="text/css" rel="stylesheet" href="/css/bootstrap.min.css" />
+    <style>
+        body { padding: 50px; background-color: #f4f7f6; }
+        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container table-container">
+        <h2>Booking Records (Admin)</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Destination</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Rooms</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadBookings() {
+            const res = await fetch('/api/bookings'); // ต้องไปเขียน API นี้เพิ่มใน index.ts ด้วย
+            const data = await res.json();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = data.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${b.destination}</td>
+                    <td>${b.check_in}</td>
+                    <td>${b.check_out}</td>
+                    <td>${b.rooms}</td>
+                    <td><span class="label label-warning">${b.status}</span></td>
+                </tr>
+            `).join('');
+        }
+        loadBookings();
+    </script>
+</body>
+</html>
