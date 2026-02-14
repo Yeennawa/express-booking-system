@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ระบบจัดการการจอง</title>
+    <link rel="stylesheet" href="css/style.css"> <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('กรุณาเข้าสู่ระบบก่อนครับ');
+            window.location.href = '/login.html';
+        }
+    </script>
+
+    <style>
+        .admin-container { padding: 40px; max-width: 1200px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8b400; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #ff4b2b; color: white; padding: 10px 20px; border: none; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <div class="header-flex">
+            <h1>รายการจองโรงแรมทั้งหมด</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <table id="bookingTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>สถานที่</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>ห้อง</th>
+                    <th>ผู้ใหญ่/เด็ก</th>
+                    <th>สถานะ</th>
+                </tr>
+            </thead>
+            <tbody id="bookingData">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // ฟังก์ชันดึงข้อมูลการจองจาก Server
+        async function fetchBookings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/bookings', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}` // ✅ ส่ง Token แนบไปใน Header
+                    }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    // ถ้า Token ปลอมหรือหมดอายุ
+                    alert('Session หมดอายุ กรุณา Login ใหม่');
+                    logout();
+                    return;
+                }
+
+                const bookings = await response.json();
+                renderTable(bookings);
+            } catch (error) {
+                console.error('Fetch error:', error);
+                alert('ไม่สามารถโหลดข้อมูลได้');
+            }
+        }
+
+        // ฟังก์ชันแสดงผลข้อมูลลงในตาราง
+        function renderTable(data) {
+            const tableBody = document.getElementById('bookingData');
+            tableBody.innerHTML = data.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.destination}</td>
+                    <td>${new Date(item.check_in).toLocaleDateString()}</td>
+                    <td>${new Date(item.check_out).toLocaleDateString()}</td>
+                    <td>${item.rooms}</td>
+                    <td>${item.adults} / ${item.children}</td>
+                    <td><span style="color: orange">${item.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // ฟังก์ชัน Logout
+        function logout() {
+            localStorage.removeItem('token'); // ลบ Token ทิ้ง
+            window.location.href = '/login.html'; // กลับไปหน้า login
+        }
+
+        // โหลดข้อมูลทันทีเมื่อเปิดหน้า
+        fetchBookings();
+    </script>
+</body>
+</html>

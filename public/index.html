@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,6 +9,7 @@
     <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
     <div id="booking" class="section">
         <div class="section-center">
@@ -24,7 +26,8 @@
                             <form id="bookingForm">
                                 <div class="form-group">
                                     <span class="form-label">Your Destination</span>
-                                    <input class="form-control" type="text" id="destination" placeholder="Enter a destination" required>
+                                    <input class="form-control" type="text" id="destination"
+                                        placeholder="Enter a destination" required>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6">
@@ -41,21 +44,38 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-4"><div class="form-group"><span class="form-label">Rooms</span>
-                                        <select class="form-control" id="rooms"><option>1</option><option>2</option></select>
-                                    </div></div>
-                                    <div class="col-sm-4"><div class="form-group"><span class="form-label">Adults</span>
-                                        <select class="form-control" id="adults"><option>1</option><option>2</option></select>
-                                    </div></div>
-                                    <div class="col-sm-4"><div class="form-group"><span class="form-label">Children</span>
-                                        <select class="form-control" id="children"><option>0</option><option>1</option></select>
-                                    </div></div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group"><span class="form-label">Rooms</span>
+                                            <select class="form-control" id="rooms">
+                                                <option>1</option>
+                                                <option>2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group"><span class="form-label">Adults</span>
+                                            <select class="form-control" id="adults">
+                                                <option>1</option>
+                                                <option>2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group"><span class="form-label">Children</span>
+                                            <select class="form-control" id="children">
+                                                <option>0</option>
+                                                <option>1</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-btn">
                                     <button class="submit-btn" type="submit">Check availability</button>
                                 </div>
                                 <div style="text-align: center; margin-top: 15px;">
-                                    <a href="/login.html" style="color: #fff; font-size: 14px; text-decoration: underline;">Admin Login</a>
+                                    <a href="/login.html"
+                                        style="color: #fff; font-size: 14px; text-decoration: underline;">Admin
+                                        Login</a>
                                 </div>
                             </form>
                         </div>
@@ -68,6 +88,16 @@
     <script>
         document.getElementById('bookingForm').onsubmit = async (e) => {
             e.preventDefault();
+
+            // ดึง Token จาก localStorage (กรณีที่คุณบังคับให้ Login ก่อนถึงจะจองได้)
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                alert("กรุณาเข้าสู่ระบบก่อนทำการจอง");
+                window.location.href = '/login.html';
+                return;
+            }
+
             const data = {
                 destination: document.getElementById('destination').value,
                 check_in: document.getElementById('check_in').value,
@@ -79,11 +109,21 @@
 
             const res = await fetch('/api/booking', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // ✅ ต้องส่งตั๋วไปด้วย Server ถึงจะยอมรับ
+                },
                 body: JSON.stringify(data)
             });
+
             const result = await res.json();
-            alert(result.message || "Booking Successful!");
+
+            if (res.status === 401 || res.status === 403) {
+                alert("Session หมดอายุ กรุณา Login ใหม่");
+                window.location.href = '/login.html';
+            } else {
+                alert(result.message || "Booking Successful!");
+            }
         };
     </script>
 </body>

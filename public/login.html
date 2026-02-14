@@ -1,34 +1,144 @@
-<div class="booking-form">
-    <h2>Admin Login</h2>
-    <form id="loginForm">
-        <div class="form-group">
-            <span class="form-label">Username</span>
-            <input class="form-control" type="text" id="user" required>
-        </div>
-        <div class="form-group">
-            <span class="form-label">Password</span>
-            <input class="form-control" type="password" id="pass" required>
-        </div>
-        <button type="submit" class="submit-btn">Login</button>
-    </form>
-</div>
-
-<script>
-    document.getElementById('loginForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                username: document.getElementById('user').value, 
-                password: document.getElementById('pass').value 
-            })
-        });
-        const result = await response.json();
-        if (result.success) {
-            window.location.href = '/admin-dashboard.html'; // ถ้าผ่านให้ไปหน้า Dashboard
-        } else {
-            alert(result.message);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+    
+    <style>
+        /* จัดการพื้นหลังให้เต็มจอและอยู่กึ่งกลาง */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* กลางแนวนอน */
+            align-items: center;     /* กลางแนวตั้ง */
+            min-height: 100vh;      /* สูงเท่าหน้าจอ */
+            background: #222d32;    /* สีโทนเข้มแบบ Admin */
+            font-family: 'Montserrat', sans-serif;
         }
-    };
-</script>
+
+        /* กล่อง Login เล็กๆ ตรงกลาง */
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 360px; /* ขนาดความกว้าง */
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 10px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ตกแต่ง Input */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #777;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* สำคัญ: ป้องกัน input ล้นกล่อง */
+            font-size: 14px;
+        }
+
+        /* ปุ่ม Login */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #f8b400; /* สีเหลืองทอง */
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #d49a00;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #888;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>Admin Login</h2>
+        <p style="color: #888; font-size: 14px; margin-bottom: 30px;">ระบบจัดการหลังบ้าน</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <span class="form-label">Username</span>
+                <input class="form-control" type="text" id="user" placeholder="ระบุชื่อผู้ใช้" required>
+            </div>
+            <div class="form-group">
+                <span class="form-label">Password</span>
+                <input class="form-control" type="password" id="pass" placeholder="ระบุรหัสผ่าน" required>
+            </div>
+            <button type="submit" class="submit-btn">LOGIN</button>
+        </form>
+        
+        <a href="/index.html" class="back-link">← กลับไปยังหน้าจอง</a>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            try {
+                // เรียกไปยัง API ที่เราเขียนไว้ใน Node.js
+                const response = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: document.getElementById('user').value, 
+                        password: document.getElementById('pass').value 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // เก็บ JWT Token ไว้ในเครื่อง เพื่อใช้เข้าหน้า Admin
+                    localStorage.setItem('token', result.token);
+                    
+                    alert('ยินดีต้อนรับผู้ดูแลระบบ');
+                    window.location.href = '/admin.html'; // แก้ให้ตรงกับชื่อไฟล์ admin ของคุณ
+                } else {
+                    alert(result.message || 'ข้อมูลไม่ถูกต้อง');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ไม่สามารถเชื่อมต่อกับ Server ได้ (เช็คว่ารัน npm run start หรือยัง?)');
+            }
+        };
+    </script>
+</body>
+</html>

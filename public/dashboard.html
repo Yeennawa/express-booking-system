@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>Admin Dashboard</title>
     <link type="text/css" rel="stylesheet" href="/css/bootstrap.min.css" />
     <style>
-        body { padding: 50px; background-color: #f4f7f6; }
-        .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        body {
+            padding: 50px;
+            background-color: #f4f7f6;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
+
 <body>
     <div class="container table-container">
         <h2>Booking Records (Admin)</h2>
@@ -24,27 +35,37 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                </tbody>
+            </tbody>
         </table>
     </div>
 
     <script>
-        async function loadBookings() {
-            const res = await fetch('/api/bookings'); // ต้องไปเขียน API นี้เพิ่มใน index.ts ด้วย
-            const data = await res.json();
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = data.map(b => `
-                <tr>
-                    <td>${b.id}</td>
-                    <td>${b.destination}</td>
-                    <td>${b.check_in}</td>
-                    <td>${b.check_out}</td>
-                    <td>${b.rooms}</td>
-                    <td><span class="label label-warning">${b.status}</span></td>
-                </tr>
-            `).join('');
+        async function getBookings() {
+            const token = localStorage.getItem('token'); // ดึงตั๋วออกมา
+
+            if (!token) {
+                alert('กรุณาเข้าสู่ระบบก่อน');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const response = await fetch('http://localhost:5000/api/bookings', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}` // ✅ ส่งตั๋วแนบไปใน Header
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                alert('ตั๋วหมดอายุ กรุณา Login ใหม่');
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            } else {
+                const data = await response.json();
+                console.log('รายการจอง:', data);
+            }
         }
-        loadBookings();
     </script>
 </body>
+
 </html>
